@@ -8,14 +8,14 @@ Menu :
 2. Download by Google Image search URL [full-url]:
 3. Download Documents from given WebSite URL [ pdf - ppt - docs - cvs ]
 
-  Option : 1 | Download by query
+>>Option : 1 | Download by query
     Enter Search Terms
-    Valid Entries :
-      (1) Linked list pdf ppt
-    Invalid Entries :
-      (1) linked List => Specify decument try for better result
+    Valid Entries :  
+      (1) Linked list pdf ppt  
+    Invalid Entries :  
+      (1) linked List => Specify decument try for better result   
 
-  Option : 2 | Download by Google Image search URL
+>>Option : 2 | Download by Google Image search URL
     Enter full URL of Web page containing Images responsed by Google Search
     
     Valid URLs :
@@ -25,7 +25,7 @@ Menu :
     Invalid URLs :
       (1) https://www.google.co.in/webhp?hl=en#hl=en&q=logoes
         
- Option : 3 | Download Documents from given WebSite URL 
+>>Option : 3 | Download Documents from given WebSite URL 
     Download all documents/files from any Web URL
     
     Valid URLs :
