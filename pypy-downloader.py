@@ -13,7 +13,8 @@ import os
 import re
 import json
 
-repeated_search=False
+# approx no of files to be downloaded
+total_files=50
 
 '''
 Get current time in Year-Month-Day-Hour-Month-Second format
@@ -27,7 +28,9 @@ def get_current_time():
     return ctime[1:]
 
 '''
-Download content specified by URL
+Download content specified by Proper URL
+Example : 
+url="https://www.google.co.in/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=linked%20list%20pdf"
 '''
 def download(url):
     page=get_content(url)
@@ -72,36 +75,55 @@ def change_directory():
     print(path)
 
 '''
-Downloads Images specified by Google search Images 
+Downloads Images specified by Google search Images
+
+Exa :
+url='https://www.google.co.in/search?q=shraddha+kapoor+hd+wallpapers&hl=en&biw=1356&bih=638&site=webhp&source=lnms&tbm=isch&sa=X&ved=0ahUKEwipmK-O16rLAhVHBY4KHd1AAZ4Q_AUIBigB'
 '''
-def download_images_from_url(links):
-    downloaded_files=0
+def download_images_from_url(url):
+
+    page=get_content(url)
+    soup=BeautifulSoup(page)
+    links=soup.find_all("a")
+    
+    success=0
     failure=0
+
+    print(soup.prettify())
+    
     for link in links:
-        try:
+        #print(link)
+        try:            
             if link.get('class')[0]=='rg_l':
                 flink=str(link.get('href'))
                 flink=flink.split('&')[0]
                 flink=flink.split('?')[1][7:]
                 if download(flink)==True:
-                    print(downloaded_files+1,' downloaded...' + flink.split('/')[-1])
+                    print(success + 1 , ' downloaded...' + flink.split('/')[-1])
                     downloaded_files+=1
                 else:
                     failure+=1
                 
         except Exception as e:
-            print(str(e))
+            print("Exception "+str(e))
             failure+=1
-    
 
+    print(success,"/",(success+failure))
+    
+'''
+Search by Google Search API
+Exa :
+url="http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s" % ('LinkedListPdf')
+'''
 def download_content_from_url(url):
+    success=0
+    failure=0
+        
     try:
         data=get_content(url).decode("utf-8")
         data=json.loads(data)
         data=data['responseData']['results']
 
-        success=0;
-        failure=0
         for link in data:
             try:
                 if download(link['url'])==True:
@@ -110,57 +132,48 @@ def download_content_from_url(url):
                     failure+=1
             except Exception as e:
                 failure+=1
+                
     except Exception as e:
         pass
 
     
 '''
-Download all files specified by Web page URL
-'''
-def download_all_files_from_url(url):
-        
-    page=get_content(url)
-    soup=BeautifulSoup(page)
-    #print(soup.prettify())
-    links=soup.find_all("a")
+Downloads documents by query
 
-    # content link pdf, ppt, docs will be downloaded
-    download_content_from_url(url)
-    
-    # download images from google search image url
-    download_images_from_url(links)
+It repeatedly sends request to Google API
+Each time Google API send 4 responses
+'''
 
-'''
-Downloads documents by query 
-'''
 def download_by_query():
     qq=input("Search for : ")
-    no_of_files=int(input("No. of files : "))
 
     query=urllib.parse.urlencode({'q':qq})
     repeated_search=True
     url="http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s&start=%s"
 
-    for i in range(1,no_of_files,4):
+    for i in range(1,total_files,4):
         furl=url%(query,str(i))
-        download_all_files_from_url(furl)
+        download_content_from_url(furl)
 
 def get_url():
     url=input("Enter URL : ")
     return url
 
+def get_no_of_files():
+    return int(input("No. of files : "))
+
 def menu():
-    print("1. Download by Search [ pdf-ppt- doc ] :")
+    print("1. Download by Search | query [ pdf-ppt- doc ] :")
     print('2. Download by Google Image search URL [full-url]:')
 
     opt=input("Your choice : ")
 
     change_directory()
-
+    
     if opt=="1":
         download_by_query()
-    else :
-        download_all_files_from_url(get_url())
+    else:
+        download_images_from_url(get_url())
 
     print('Download completed...')
 
@@ -180,3 +193,4 @@ url='https://www.google.co.in/search?q=shraddha+kapoor+hd+wallpapers&hl=en&biw=1
 url="http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s" % ('LinkedListPdf')
 
 '''
+
