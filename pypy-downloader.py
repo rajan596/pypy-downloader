@@ -2,8 +2,10 @@
 PYTHON 3.4
 Content Downloader
 
-Issues to be solved : URLParsering
+Issues to be solved :
 
+1. URLParsering
+2. Solve limited Image Downloads
 '''
 
 import urllib.request, urllib.parse
@@ -15,6 +17,12 @@ import json
 
 # approx no of files to be downloaded
 total_files=50
+DOWNLOAD_FILE_EXTENSIONS =['pdf' , 'ppt' , 'doc' , 'txt' , 'csv' ,
+                           'jpg' , 'jpeg', 'png', 'gif',
+                           'mp3',
+                           'mp4'
+                           ]
+
 
 '''
 Get current time in Year-Month-Day-Hour-Month-Second format
@@ -27,6 +35,20 @@ def get_current_time():
         ctime+='-'+str(t)
     return ctime[1:]
 
+
+def get_url():
+    url=input("Enter URL : ")
+    return url
+
+def get_no_of_files():
+    return int(input("No. of files : "))
+
+def get_extension(url):
+    try:
+        return url.split(".")[-1]
+    except Exception as e:
+        return 'invalid'
+
 '''
 Download content specified by Proper URL
 Example : 
@@ -35,7 +57,7 @@ url="https://www.google.co.in/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-
 def download(url):
     page=get_content(url)
     name=url.split('/')[-1]
-    print(url)
+    print("   ",url)
     success=False
     try:
         file=open(name,'wb')
@@ -72,7 +94,7 @@ def change_directory():
     os.mkdir(new_dir)
     path=path+'/'+new_dir
     os.chdir(path)
-    print(path)
+    print("Download Path : ",path)
 
 '''
 Downloads Images specified by Google search Images
@@ -89,7 +111,7 @@ def download_images_from_url(url):
     success=0
     failure=0
 
-    print(soup.prettify())
+    #print(soup.prettify())
     
     for link in links:
         #print(link)
@@ -100,7 +122,7 @@ def download_images_from_url(url):
                 flink=flink.split('?')[1][7:]
                 if download(flink)==True:
                     print(success + 1 , ' downloaded...' + flink.split('/')[-1])
-                    downloaded_files+=1
+                    success+=1
                 else:
                     failure+=1
                 
@@ -109,13 +131,40 @@ def download_images_from_url(url):
             failure+=1
 
     print(success,"/",(success+failure))
+
+'''
+Downloads content [ pdf | ppt | docs | csv ] from specified URL [ Not by Google search ]
+Example :
+http://172.16.1.10/moodle/course/view.php?id=313
+whole docs on thhis
+'''
+def download_content_from_url(url):
+    page=get_content(url)
+    soup=BeautifulSoup(page)
+    all_a_tags = soup.find_all("a")
+    success=0
+    try:
+        for a in all_a_tags:
+            link=a.get('href')
+            #print(link)
+
+            if get_extension(link) in DOWNLOAD_FILE_EXTENSIONS:
+                success+=1
+                print(success,"  ", link.split('/')[-1])
+                download(link)
+            
+    except Exception as e:
+        print(str(e))
+
+    print(success,' files downloaded... ')
     
 '''
 Search by Google Search API
 Exa :
 url="http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s" % ('LinkedListPdf')
 '''
-def download_content_from_url(url):
+
+def download_content_by_googlesearch_query_url(url):
     success=0
     failure=0
         
@@ -153,18 +202,15 @@ def download_by_query():
 
     for i in range(1,total_files,4):
         furl=url%(query,str(i))
-        download_content_from_url(furl)
+        download_content_by_googlesearch_query_url(furl)
 
-def get_url():
-    url=input("Enter URL : ")
-    return url
-
-def get_no_of_files():
-    return int(input("No. of files : "))
-
+'''
+Menu to Show options
+'''
 def menu():
     print("1. Download by Search | query [ pdf-ppt- doc ] :")
     print('2. Download by Google Image search URL [full-url]:')
+    print('3. Download Documents from given WebSite URL [ pdf - ppt - docs - cvs ]')
 
     opt=input("Your choice : ")
 
@@ -172,13 +218,17 @@ def menu():
     
     if opt=="1":
         download_by_query()
-    else:
+    elif opt=="2":
         download_images_from_url(get_url())
+    else:
+        download_content_from_url(get_url())
 
-    print('Download completed...')
+    print('Done........')
+
 
 if __name__=='__main__':
     menu()
+
     
 ''' 
 url='http://orig02.deviantart.net/d778/f/2012/147/5/e/the_dark_knight_rises___batman_by_dskorn-d51ahxm.jpg'
